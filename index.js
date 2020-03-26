@@ -1,9 +1,10 @@
+require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
+const Person = require('./models/person');
 
 const app = express();
-
 
 app.use(express.json());
 app.use(cors());
@@ -14,19 +15,6 @@ app.use(morgan(
   ':method :url :status :res[content-length] - :response-time ms :data'
 ));
 
-let persons = [
-  {
-    name: 'Emil Dimitrov',
-    number: '123-164363636',
-    id: 1
-  },
-  {
-    name: 'Dan Abramov',
-    number: '533-53523522',
-    id: 2
-  }
-];
-
 app.get('/info', (req, res) => {
   const html = `<p>Phonebook has info for ${persons.length} people</p><p>${new Date()}</p>`
 
@@ -34,7 +22,9 @@ app.get('/info', (req, res) => {
 });
 
 app.get('/api/persons', (req, res) => {
-  res.json(persons);
+  Person.find({}).then(persons => {
+    res.json(persons.map(p => p.toJSON()));
+  });
 });
 
 app.get('/api/persons/:id', (req, res) => {
