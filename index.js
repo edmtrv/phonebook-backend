@@ -16,9 +16,11 @@ app.use(morgan(
 ));
 
 app.get('/info', (req, res) => {
-  const html = `<p>Phonebook has info for ${persons.length} people</p><p>${new Date()}</p>`
+  Person.find({}).then(persons => {
+    const html = `<p>Phonebook has info for ${persons.length} people</p><p>${new Date()}</p>`
 
-  res.send(html);
+    res.send(html);
+  });
 });
 
 app.get('/api/persons', (req, res) => {
@@ -28,15 +30,15 @@ app.get('/api/persons', (req, res) => {
 });
 
 app.get('/api/persons/:id', (req, res) => {
-  const id = +req.params.id;
-
-  const person = persons.find(p => p.id === id);
-
-  if (!person) {
-    return res.status(404).end();
-  }
-
-  res.json(person);
+  Person.findById(req.params.id)
+    .then(person => {
+      if (person) {
+        res.json(person);
+      } else {
+        res.status(404).end();
+      }
+    })
+    .catch(err => next(err));
 });
 
 app.delete('/api/persons/:id', (req, res, next) => {
